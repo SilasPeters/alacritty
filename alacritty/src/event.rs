@@ -1824,7 +1824,17 @@ impl input::Processor<EventProxy, ActionContext<'_, Notifier, EventProxy>> {
                             return;
                         }
 
+                        // Resize window
                         self.ctx.display.pending_update.set_dimensions(size);
+
+                        // If the user configured dynamic font sizes, we update the font size if the
+                        // new window size corresponds with a dynamic font size.
+                        let normal_font = self.ctx.config.font.clone();
+                        let dynamic_font_size_config = self.ctx.config.dynamic_font_size.clone();
+                        let font_size = dynamic_font_size_config.determine_font_size(normal_font.size(), &size);
+                        let font = normal_font.with_size(font_size);
+                        self.ctx.display.font_size = font_size;
+                        self.ctx.display.pending_update.set_font(font);
                     },
                     WindowEvent::KeyboardInput { event, is_synthetic: false, .. } => {
                         self.key_input(event);
